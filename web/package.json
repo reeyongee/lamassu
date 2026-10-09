@@ -1,0 +1,24 @@
+{
+  "name": "lamassu-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Realtime frontend for lamassu: process tree, event stream, findings, taint, canary, drop counters, provenance.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.4",
+    "jsdom": "^25.0.1",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.8"
+  },
+  "packageManager": "pnpm@11.28.5",
+  "engines": {
+    "node": ">=18"
+  }
+}

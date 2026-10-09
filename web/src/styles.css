@@ -1,0 +1,344 @@
+/*
+ * The visual language.
+ *
+ * Two rules drive everything here:
+ *
+ *   1. An invariant finding and a scored finding must not look alike. An
+ *      invariant is a structural guarantee that forced the decision; a scored
+ *      finding is a heuristic number compared against a threshold. So the
+ *      invariant mark is solid, boxed, full-contrast and loud; the scored mark
+ *      is dashed, dim, lower-case and quiet. They differ in shape, weight,
+ *      colour and case at once, so they cannot be confused at a glance or in
+ *      greyscale.
+ *   2. A lossy feed must be obvious. The drop banner and the provenance banner
+ *      are the loudest things on the page, above the fold, before any panel.
+ */
+
+:root {
+  --bg: #0b0d10;
+  --panel: #14171c;
+  --panel-2: #191d23;
+  --line: #262c35;
+  --fg: #e6e9ee;
+  --dim: #8b95a5;
+  --accent: #7cc4ff;
+  --invariant: #ff3b30;
+  --invariant-bg: #3a0f0c;
+  --scored: #8b95a5;
+  --canary: #ffd400;
+  --warn: #ff9f0a;
+  --ok: #37d67a;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 13px/1.5 ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+}
+
+/* ------------------------------------------------------------- toolbar */
+
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 16px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+}
+
+.toolbar .file-label { display: flex; gap: 8px; align-items: center; color: var(--dim); }
+.toolbar .ws { display: flex; gap: 8px; align-items: center; }
+.toolbar input[type="text"] {
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font: inherit;
+}
+.toolbar button {
+  background: var(--panel-2);
+  color: var(--fg);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font: inherit;
+}
+.toolbar button:hover { border-color: var(--accent); color: var(--accent); }
+.source-note { color: var(--dim); margin-left: auto; }
+
+/* --------------------------------------------------------------- head */
+
+.head { padding: 16px; }
+.head h1 { margin: 0; font-size: 18px; letter-spacing: 0.04em; }
+.head .sub { color: var(--dim); font-weight: 400; }
+.tagline { margin: 4px 0 0; color: var(--dim); }
+
+/* ---------------------------------------------------------- statusbar */
+
+.statusbar {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 6px 16px;
+  border-bottom: 1px solid var(--line);
+  color: var(--dim);
+  font-size: 12px;
+}
+.src-live { color: var(--ok); }
+.src-error { color: var(--invariant); }
+.src-idle { color: var(--warn); }
+.src-closed { color: var(--dim); }
+
+/* ----------------------------------------------------------- banners */
+
+.banners { display: grid; gap: 8px; padding: 12px 16px 0; }
+.banner {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 14px;
+  border-radius: 4px;
+  border-left: 6px solid;
+  font-size: 12px;
+}
+.banner strong { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
+.banner ul { margin: 0; padding-left: 18px; color: inherit; }
+
+/* The provenance banner is persistent data, not a transient toast: the proxy
+   path is weaker and the UI must not hide it. */
+.banner-provenance {
+  border-color: var(--warn);
+  background: #2a2005;
+  color: #ffe0a3;
+}
+/* A lossy feed is the single most important thing on the page. */
+.banner-loss {
+  border-color: var(--invariant);
+  background: var(--invariant-bg);
+  color: #ffd6d2;
+  animation: pulse 2s ease-in-out infinite;
+}
+.banner-protocol { border-color: var(--accent); background: #0e2233; color: #cde8ff; }
+
+@keyframes pulse {
+  0%, 100% { border-color: var(--invariant); }
+  50% { border-color: #ff8b83; }
+}
+@media (prefers-reduced-motion: reduce) { .banner-loss { animation: none; } }
+
+/* ------------------------------------------------------------- stats */
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+  padding: 12px 16px;
+}
+.stat { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 8px 10px; }
+.stat-k { display: block; color: var(--dim); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; }
+.stat-v { display: block; font-size: 18px; }
+
+/* Multi-column rather than grid rows: panels have wildly different heights
+   (the event stream is tall, the provenance split is short), and grid rows
+   would align the second row to the tallest panel in the first, leaving a
+   large empty band. Columns pack each panel under the previous one, so the
+   dashboard has no gaps and reading order is top-to-bottom within a column. */
+.grid {
+  columns: 470px;
+  column-gap: 12px;
+  padding: 0 16px 32px;
+}
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 10px 12px;
+  /* A panel must not be split across two columns. */
+  break-inside: avoid;
+  margin: 0 0 12px;
+}
+.panel h2 { margin: 0 0 8px; font-size: 13px; letter-spacing: 0.05em; text-transform: uppercase; }
+.hint { color: var(--dim); font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 11px; }
+.empty { color: var(--dim); margin: 4px 0; }
+.scroll { max-height: 380px; overflow: auto; border: 1px solid var(--line); border-radius: 3px; }
+
+/* ------------------------------------------------------------ tables */
+
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+thead th {
+  position: sticky;
+  top: 0;
+  background: var(--panel-2);
+  text-align: left;
+  color: var(--dim);
+  font-weight: 500;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--line);
+}
+tbody td { padding: 3px 8px; border-bottom: 1px solid #1b2027; vertical-align: top; }
+tbody tr:hover { background: #1a1f26; }
+.c-seq, .c-ts, .c-pid { color: var(--dim); white-space: nowrap; }
+.c-detail { word-break: break-all; }
+.mode { color: var(--dim); }
+.peer { color: var(--accent); }
+
+/* ------------------------------------------------------------- kinds */
+
+.kind { padding: 0 6px; border-radius: 3px; font-size: 11px; }
+.kind-exec { background: #10301d; color: var(--ok); }
+.kind-exit { background: #24282e; color: var(--dim); }
+.kind-open { background: #10243a; color: var(--accent); }
+.kind-net { background: #2b1b3a; color: #d0a6ff; }
+
+/* -------------------------------------------------------------- tree */
+
+.tree { list-style: none; margin: 0; padding: 0; }
+.proc-node {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  padding: 2px 0 2px calc(var(--indent, 0px));
+  border-left: 2px solid transparent;
+  font-size: 12px;
+}
+.proc-comm { font-weight: 600; }
+.proc-meta { color: var(--dim); }
+.proc-alive { color: var(--ok); }
+.proc-exited { color: var(--dim); }
+
+/* A tainted node is not just coloured: it carries a word. */
+.proc-node.is-tainted { border-left-color: var(--invariant); background: #1d1210; }
+.taint-flag {
+  background: var(--invariant);
+  color: #fff;
+  border-radius: 2px;
+  padding: 0 5px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+.taint-dot { color: var(--invariant); }
+.is-tainted .proc-comm { color: #ffb3ad; }
+
+/* ------------------------------------- the invariant / scored distinction */
+
+/* Distinction is carried by four channels at once: shape (solid box vs dashed
+   outline), weight, colour, and case. Either one alone would be lost on a
+   greyscale or colour-blind display. */
+.mark {
+  display: inline-block;
+  border-radius: 3px;
+  padding: 0 6px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.mark-invariant {
+  background: var(--invariant);
+  color: #fff;
+  border: 1px solid var(--invariant);
+  text-transform: uppercase;
+}
+.mark-scored {
+  background: transparent;
+  color: var(--scored);
+  border: 1px dashed var(--scored);
+  font-weight: 400;
+  text-transform: lowercase;
+}
+
+.row-invariant td { background: #1d0f0d; }
+.row-invariant .c-rule { color: #ffb3ad; font-weight: 600; }
+.row-scored td { background: transparent; }
+.row-scored .c-rule { color: var(--dim); }
+
+.legend { display: flex; flex-wrap: wrap; gap: 16px; margin: 0 0 6px; color: var(--dim); font-size: 11px; }
+.legend-item { display: flex; gap: 6px; align-items: center; }
+.counts { display: flex; gap: 16px; margin-bottom: 8px; font-size: 12px; }
+.counts [data-testid="count-invariant"] { color: var(--invariant); font-weight: 700; }
+.counts [data-testid="count-scored"] { color: var(--dim); }
+
+.forced {
+  background: var(--invariant);
+  color: #fff;
+  border-radius: 2px;
+  padding: 0 5px;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------- severity */
+
+.sev { padding: 0 5px; border-radius: 2px; font-size: 11px; }
+.sev-info { background: #24282e; color: var(--dim); }
+.sev-low { background: #123040; color: #7fd4ff; }
+.sev-medium { background: #3a3005; color: #ffd766; }
+.sev-high { background: #3a1e05; color: #ffab5c; }
+.sev-critical { background: var(--invariant); color: #fff; font-weight: 700; }
+
+/* --------------------------------------------------------- provenance */
+
+.prov { padding: 0 5px; border-radius: 2px; font-size: 11px; }
+.prov-declared { background: #10301d; color: var(--ok); border: 1px solid #1d5c37; }
+.prov-inferred { background: #2a2005; color: var(--warn); border: 1px dashed var(--warn); }
+.prov-split { display: flex; gap: 8px; margin-bottom: 8px; }
+.prov-col { flex: 1; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--line); }
+.prov-col-declared { border-color: #1d5c37; }
+.prov-col-inferred { border-color: var(--warn); border-style: dashed; }
+.prov-k { display: block; color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; }
+.prov-v { font-size: 18px; }
+
+/* ------------------------------------------------------------- canary */
+
+.panel-canary { border-color: var(--canary); box-shadow: 0 0 0 1px #4d3f00 inset; }
+.panel-canary h2 { color: var(--canary); }
+.canary-list { list-style: none; margin: 0; padding: 0; }
+.canary-list li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: 8px;
+  border-bottom: 1px solid var(--line);
+}
+.canary-flag {
+  background: var(--canary);
+  color: #201a00;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  border-radius: 2px;
+  padding: 0 6px;
+  font-size: 11px;
+}
+.canary-digest { color: var(--canary); }
+
+/* ---------------------------------------------------------------- misc */
+
+.digest { color: var(--dim); font-variant-numeric: tabular-nums; }
+.digest-absent { font-style: italic; }
+.session-list, .taint-list { list-style: none; margin: 0; padding: 0; }
+.session-list li, .taint-list li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid #1b2027;
+  font-size: 12px;
+}
+.taint-list li { border-left: 2px solid var(--invariant); padding-left: 8px; }
+.sess-id { font-weight: 700; }
+.sess-origins, .sess-count, .sess-root, .sess-spans, .sess-findings { color: var(--dim); }
+.origin { color: var(--warn); border: 1px solid var(--warn); border-radius: 2px; padding: 0 4px; margin-right: 4px; }
